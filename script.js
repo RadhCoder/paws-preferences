@@ -108,22 +108,29 @@ function showImage() {
         const img = document.getElementById("catImage");
         const photoArea = img.parentElement;
 
-        // Add loading state
-        photoArea.classList.add('loading-image');
-
-        // Use preloaded image if available for instant display
+        // Check if image is preloaded and ready
         if (preloadedImages[index] && preloadedImages[index].complete) {
+            // Instant display - image is already loaded
             img.src = preloadedImages[index].src;
             photoArea.classList.remove('loading-image');
         } else {
-            // Fallback if not preloaded yet
+            // Show loading state briefly
+            photoArea.classList.add('loading-image');
+
+            // Set up load handler before setting src
             img.onload = () => {
                 photoArea.classList.remove('loading-image');
             };
-            img.src = images[index];
+
+            // Try to use preloaded image or fallback to URL
+            if (preloadedImages[index]) {
+                img.src = preloadedImages[index].src;
+            } else {
+                img.src = images[index];
+            }
         }
 
-        // Update counter and caption
+        // Update counter and caption immediately
         document.getElementById("counter").innerText = `Cat ${index + 1} of ${TOTAL}`;
         caption.innerText = captions[index % captions.length];
 
@@ -131,7 +138,7 @@ function showImage() {
         likeIndicator.style.opacity = "0";
         dislikeIndicator.style.opacity = "0";
 
-        // Preload next batch of images
+        // Aggressively preload next images
         preloadNextImages(index + 1);
     } else {
         showResult();
@@ -139,29 +146,36 @@ function showImage() {
 }
 
 function like() {
-    if (index >= images.length) return;
+    if (index >= images.length || card.classList.contains('swiping')) return;
 
     liked.push(images[index]);
     animateSwipe("right");
 }
 
 function dislike() {
-    if (index >= images.length) return;
+    if (index >= images.length || card.classList.contains('swiping')) return;
 
     animateSwipe("left");
 }
 
 function animateSwipe(direction) {
+    // Prevent multiple swipes
+    if (card.classList.contains('swiping')) return;
+    card.classList.add('swiping');
+
     // Add animation class
     card.classList.add(`swipe-${direction}`);
 
-    // Wait for animation to complete
+    // Immediately move to next image (don't wait for animation)
+    index++;
+
+    // Wait only 200ms for animation (faster than before)
     setTimeout(() => {
         card.classList.remove(`swipe-${direction}`);
-        index++;
+        card.classList.remove('swiping');
         resetCard();
         showImage();
-    }, 300);
+    }, 200);
 }
 
 function showResult() {
@@ -286,6 +300,12 @@ function endSwipe(e) {
     if (!isDragging) return;
     isDragging = false;
 
+    // Prevent multiple swipes at once
+    if (card.classList.contains('swiping')) {
+        resetCard();
+        return;
+    }
+
     let endX;
 
     if (e.type === "mouseup" || e.type === "mouseleave") {
@@ -297,8 +317,8 @@ function endSwipe(e) {
 
     let diff = endX - startX;
 
-    // Threshold for swipe detection
-    const SWIPE_THRESHOLD = 100;
+    // Lower threshold for faster response (80 instead of 100)
+    const SWIPE_THRESHOLD = 80;
 
     if (diff > SWIPE_THRESHOLD) {
         like();
