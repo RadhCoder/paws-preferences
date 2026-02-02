@@ -129,6 +129,32 @@ body {
     padding: 1rem;
 }
 
+/* Performance optimizations */
+.card {
+    will-change: transform;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+#catImage {
+    will-change: opacity;
+}
+
+/* Results scrollable area */
+#result {
+    max-height: 70vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#app {
+    max-height: 95vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
     .float-animation {

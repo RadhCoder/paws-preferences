@@ -91,25 +91,15 @@ function showImage() {
     if (index < images.length) {
         const img = document.getElementById("catImage");
 
-        // Fade in effect
-        img.style.opacity = "0";
+        // Simple image update without complex transitions
         img.src = images[index];
-
-        img.onload = () => {
-            setTimeout(() => {
-                img.style.opacity = "1";
-                img.style.transition = "opacity 0.3s ease";
-            }, 50);
-        };
 
         // Update counter and caption
         document.getElementById("counter").innerText = `Cat ${index + 1} of ${TOTAL}`;
         caption.innerText = captions[index % captions.length];
 
         // Reset indicators
-        likeIndicator.classList.remove("show");
         likeIndicator.style.opacity = "0";
-        dislikeIndicator.classList.remove("show");
         dislikeIndicator.style.opacity = "0";
     } else {
         showResult();
@@ -143,8 +133,10 @@ function animateSwipe(direction) {
 }
 
 function showResult() {
+    // Hide main UI elements
     document.getElementById("card-container").style.display = "none";
     document.querySelector(".buttons").style.display = "none";
+    document.getElementById("counter").style.display = "none";
 
     let resultDiv = document.getElementById("result");
     resultDiv.classList.remove("hidden");
@@ -154,7 +146,7 @@ function showResult() {
 
     if (liked.length === 0) {
         html = `
-            <div class="p-10">
+            <div class="py-8">
                 <h3 class="text-4xl font-bold text-pink-500 mb-5 handwritten">No cats liked? 😿</h3>
                 <p class="text-xl text-gray-600 mb-8 handwritten">Maybe you're more of a dog person?</p>
                 <button onclick="restart()" 
@@ -166,11 +158,12 @@ function showResult() {
         `;
     } else {
         html = `
-            <h3 class="text-4xl font-bold text-pink-500 mb-8 handwritten">
-                You liked ${liked.length} ${liked.length === 1 ? 'cat' : 'cats'}! 😺
-            </h3>
+            <div class="max-h-[60vh] overflow-y-auto pb-4">
+                <h3 class="text-4xl font-bold text-pink-500 mb-6 handwritten sticky top-0 bg-white py-2">
+                    You liked ${liked.length} ${liked.length === 1 ? 'cat' : 'cats'}! 😺
+                </h3>
+                <div class="grid grid-cols-3 gap-4 mb-6">
         `;
-        html += `<div class="grid grid-cols-3 gap-4 mb-8">`;
 
         liked.forEach((img, i) => {
             html += `
@@ -181,10 +174,11 @@ function showResult() {
             `;
         });
 
-        html += `</div>`;
         html += `
+                </div>
+            </div>
             <button onclick="restart()" 
-                    class="flex flex-col items-center justify-center gap-2 px-10 py-5 border-none rounded-full text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg bg-gradient-to-br from-pink-400 to-purple-400 text-white hover:shadow-xl hover:-translate-y-1 active:scale-95 mx-auto">
+                    class="flex flex-col items-center justify-center gap-2 px-10 py-5 border-none rounded-full text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg bg-gradient-to-br from-pink-400 to-purple-400 text-white hover:shadow-xl hover:-translate-y-1 active:scale-95 mx-auto mt-4">
                 <span class="text-3xl">🔄</span>
                 <span class="text-sm uppercase tracking-wider">Start Over</span>
             </button>
@@ -201,6 +195,7 @@ function restart() {
 
     document.getElementById("card-container").style.display = "flex";
     document.querySelector(".buttons").style.display = "flex";
+    document.getElementById("counter").style.display = "block";
     document.getElementById("result").classList.add("hidden");
 
     init();
@@ -235,20 +230,23 @@ function moveSwipe(e) {
     // Calculate rotation based on horizontal movement
     let rotation = diffX / 10;
 
-    // Apply transform (only horizontal movement)
-    card.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
+    // Use requestAnimationFrame for smoother performance
+    requestAnimationFrame(() => {
+        // Apply transform (only horizontal movement)
+        card.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
 
-    // Show/hide indicators based on swipe direction
-    if (diffX > 50) {
-        likeIndicator.style.opacity = "1";
-        dislikeIndicator.style.opacity = "0";
-    } else if (diffX < -50) {
-        dislikeIndicator.style.opacity = "1";
-        likeIndicator.style.opacity = "0";
-    } else {
-        likeIndicator.style.opacity = "0";
-        dislikeIndicator.style.opacity = "0";
-    }
+        // Show/hide indicators based on swipe direction
+        if (diffX > 50) {
+            likeIndicator.style.opacity = "1";
+            dislikeIndicator.style.opacity = "0";
+        } else if (diffX < -50) {
+            dislikeIndicator.style.opacity = "1";
+            likeIndicator.style.opacity = "0";
+        } else {
+            likeIndicator.style.opacity = "0";
+            dislikeIndicator.style.opacity = "0";
+        }
+    });
 }
 
 function endSwipe(e) {

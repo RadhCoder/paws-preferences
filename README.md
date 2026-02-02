@@ -26,7 +26,7 @@ Built with **Tailwind CSS** for rapid development while maintaining a unique, no
 
 ## 🚀 Live Demo
 
-[https://radhcoder.github.io/paws-preferences/](#)
+[View Live Site](https://radhcoder.github.io/paws-preferences/)
 
 ## 🛠️ Technologies Used
 
