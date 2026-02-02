@@ -50,11 +50,10 @@ async function init() {
     card.addEventListener("touchmove", moveSwipe, { passive: false });
     card.addEventListener("touchend", endSwipe);
 
-    // Add mouse events for desktop
+    // Add mouse events for desktop - using document for mouseup to catch it anywhere
     card.addEventListener("mousedown", startSwipe);
     card.addEventListener("mousemove", moveSwipe);
-    card.addEventListener("mouseup", endSwipe);
-    card.addEventListener("mouseleave", endSwipe);
+    document.addEventListener("mouseup", endSwipe);
 
     await loadCats();
 }
@@ -257,11 +256,21 @@ function restart() {
 /* Swipe Gesture Logic */
 
 function startSwipe(e) {
-    e.preventDefault();
+    // Prevent default for touch events
+    if (e.type === "touchstart") {
+        e.preventDefault();
+    }
+
     isDragging = true;
 
     if (e.type === "mousedown") {
         startX = e.clientX;
+        // Prevent image drag on mouse
+        const images = card.querySelectorAll('img');
+        images.forEach(img => {
+            img.style.pointerEvents = 'none';
+            img.style.userSelect = 'none';
+        });
     } else {
         startX = e.touches[0].clientX;
     }
@@ -269,6 +278,9 @@ function startSwipe(e) {
 
 function moveSwipe(e) {
     if (!isDragging) return;
+
+    // Prevent default for both touch and mouse to avoid unwanted browser behavior
+    e.preventDefault();
 
     let currentX;
 
@@ -304,7 +316,15 @@ function moveSwipe(e) {
 
 function endSwipe(e) {
     if (!isDragging) return;
+
     isDragging = false;
+
+    // Re-enable pointer events on images
+    const images = card.querySelectorAll('img');
+    images.forEach(img => {
+        img.style.pointerEvents = 'auto';
+        img.style.userSelect = 'auto';
+    });
 
     // Prevent multiple swipes at once
     if (card.classList.contains('swiping')) {
@@ -314,11 +334,14 @@ function endSwipe(e) {
 
     let endX;
 
-    if (e.type === "mouseup" || e.type === "mouseleave") {
-        if (e.type === "mouseleave" && !isDragging) return;
+    if (e.type === "mouseup") {
         endX = e.clientX;
-    } else {
+    } else if (e.type === "touchend") {
         endX = e.changedTouches[0].clientX;
+    } else {
+        // Safety fallback
+        resetCard();
+        return;
     }
 
     let diff = endX - startX;
