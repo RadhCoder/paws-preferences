@@ -1,77 +1,245 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #f0f2f5;
-    text-align: center;
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
-h2 {
-    margin-top: 20px;
-}
-
-#app {
-    max-width: 400px;
-    margin: auto;
-}
-
-#counter {
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-#card-container {
-    position: relative;
-    height: 420px;
-}
-
-.card {
-    width: 320px;
-    height: 380px;
-    margin: auto;
-    border-radius: 15px;
+html {
     overflow: hidden;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    touch-action: none;
-    transition: transform 0.3s ease;
+    height: 100vh;
 }
 
-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+body {
+    font-family: 'Fredoka', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
 }
 
-.buttons {
-    margin-top: 20px;
+.handwritten {
+    font-family: 'Covered By Your Grace', cursive;
 }
 
-button {
-    padding: 12px 18px;
-    margin: 10px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(-2deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(2deg);
+    }
 }
 
-.like {
-    background: #4CAF50;
-    color: white;
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.dislike {
-    background: #e74c3c;
-    color: white;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.hidden {
-    display: none;
+@keyframes swipeLeft {
+    to {
+        transform: translateX(-150%) rotate(-30deg);
+        opacity: 0;
+    }
 }
 
-.result-images img {
-    width: 120px;
-    margin: 5px;
-    border-radius: 10px;
+@keyframes swipeRight {
+    to {
+        transform: translateX(150%) rotate(30deg);
+        opacity: 0;
+    }
+}
+
+.float-animation {
+    animation: float 3s ease-in-out infinite;
+}
+
+.swipe-left {
+    animation: swipeLeft 0.3s ease-out forwards;
+}
+
+.swipe-right {
+    animation: swipeRight 0.3s ease-out forwards;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+.card-shadow {
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.1),
+        0 10px 20px rgba(0, 0, 0, 0.15),
+        0 0 0 8px #fff,
+        0 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.polaroid-shadow {
+    box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.2),
+        0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.text-shadow-fun {
+    text-shadow: 3px 3px 0px rgba(255, 182, 193, 0.8);
+}
+
+.bg-pattern {
+    background-color: #fff1eb;
+    background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 192, 203, 0.05) 35px, rgba(255, 192, 203, 0.05) 70px);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 182, 193, 0.3);
+    border-top-color: #ff6b9d;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.paw-cursor {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="20" r="4" fill="%23ff6b9d"/><circle cx="10" cy="14" r="3" fill="%23ff6b9d"/><circle cx="22" cy="14" r="3" fill="%23ff6b9d"/><circle cx="12" cy="8" r="2.5" fill="%23ff6b9d"/><circle cx="20" cy="8" r="2.5" fill="%23ff6b9d"/></svg>'), auto;
+}
+
+/* Main container */
+.main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .float-animation {
+        font-size: 3rem;
+    }
+
+    header h1 {
+        font-size: 2.5rem !important;
+    }
+
+    header p {
+        font-size: 0.9rem !important;
+    }
+
+    .main-container {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-height: 800px) {
+    header {
+        margin-bottom: 1rem !important;
+    }
+
+    #app {
+        padding: 1.5rem 1rem !important;
+    }
+
+    #card-container {
+        height: 380px !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .card {
+        height: 360px !important;
+    }
+
+    .photo-area {
+        height: 260px !important;
+    }
+}
+
+@media (max-height: 700px) {
+    header h1 {
+        font-size: 2rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    header p {
+        font-size: 0.875rem !important;
+    }
+
+    header {
+        margin-bottom: 0.75rem !important;
+    }
+
+    #app {
+        padding: 1rem !important;
+    }
+
+    #counter {
+        font-size: 1.25rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    #card-container {
+        height: 320px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .card {
+        height: 300px !important;
+    }
+
+    .photo-area {
+        height: 220px !important;
+    }
+
+    .buttons {
+        gap: 1rem !important;
+    }
+
+    .buttons button {
+        padding: 0.75rem 1.5rem !important;
+        min-width: 90px !important;
+    }
+
+    .buttons button .text-3xl {
+        font-size: 1.5rem !important;
+    }
+}
+
+@media (max-height: 600px) {
+    .main-container {
+        align-items: flex-start;
+        padding-top: 1rem;
+    }
+
+    header {
+        margin-bottom: 0.5rem !important;
+    }
+
+    #card-container {
+        height: 260px !important;
+    }
+
+    .card {
+        height: 240px !important;
+    }
+
+    .photo-area {
+        height: 180px !important;
+    }
 }

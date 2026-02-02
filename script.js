@@ -4,34 +4,142 @@ let liked = [];
 
 const TOTAL = 15;
 
+// Fun captions for the polaroid
+const captions = [
+    "Is this love? 😻",
+    "Your new bestie?",
+    "Adopt me maybe? 🐱",
+    "Purr-fect match?",
+    "Feeling the vibe?",
+    "Cat-ch your eye?",
+    "Love at first sight?",
+    "The one? 💕",
+    "Meow or nah?",
+    "Heart eyes?",
+    "Swipe right? 😸",
+    "Whisker winner?",
+    "Feline good?",
+    "Too cute to pass?",
+    "Your soulmate? 💖"
+];
+
+// DOM Elements
+let card;
+let likeIndicator;
+let dislikeIndicator;
+let cardContainer;
+let loading;
+let caption;
+
+// Swipe variables
+let startX = 0;
+let isDragging = false;
+
+// Initialize app
+async function init() {
+    card = document.getElementById("card");
+    likeIndicator = document.getElementById("like-indicator");
+    dislikeIndicator = document.getElementById("dislike-indicator");
+    cardContainer = document.getElementById("card-container");
+    loading = document.getElementById("loading");
+    caption = document.getElementById("caption");
+
+    // Add event listeners for swipe
+    card.addEventListener("touchstart", startSwipe, { passive: false });
+    card.addEventListener("touchmove", moveSwipe, { passive: false });
+    card.addEventListener("touchend", endSwipe);
+
+    // Add mouse events for desktop
+    card.addEventListener("mousedown", startSwipe);
+    card.addEventListener("mousemove", moveSwipe);
+    card.addEventListener("mouseup", endSwipe);
+    card.addEventListener("mouseleave", endSwipe);
+
+    await loadCats();
+}
+
 async function loadCats() {
+    // Show loading spinner
+    card.style.display = "none";
+    loading.classList.remove("hidden");
+    loading.classList.add("flex");
+
+    // Load cat images with unique timestamps
     for (let i = 0; i < TOTAL; i++) {
-        images.push(`https://cataas.com/cat?random=${Math.random()}`);
+        images.push(`https://cataas.com/cat?${Date.now()}-${i}`);
     }
-    showImage();
+
+    // Preload first image
+    const firstImage = new Image();
+    firstImage.onload = () => {
+        loading.classList.add("hidden");
+        loading.classList.remove("flex");
+        card.style.display = "block";
+        showImage();
+    };
+    firstImage.onerror = () => {
+        // If image fails to load, still show the card
+        loading.classList.add("hidden");
+        loading.classList.remove("flex");
+        card.style.display = "block";
+        showImage();
+    };
+    firstImage.src = images[0];
 }
 
 function showImage() {
     if (index < images.length) {
-        document.getElementById("catImage").src = images[index];
-        document.getElementById("counter").innerText =
-            `Cat ${index + 1} of ${TOTAL}`;
+        const img = document.getElementById("catImage");
+
+        // Fade in effect
+        img.style.opacity = "0";
+        img.src = images[index];
+
+        img.onload = () => {
+            setTimeout(() => {
+                img.style.opacity = "1";
+                img.style.transition = "opacity 0.3s ease";
+            }, 50);
+        };
+
+        // Update counter and caption
+        document.getElementById("counter").innerText = `Cat ${index + 1} of ${TOTAL}`;
+        caption.innerText = captions[index % captions.length];
+
+        // Reset indicators
+        likeIndicator.classList.remove("show");
+        likeIndicator.style.opacity = "0";
+        dislikeIndicator.classList.remove("show");
+        dislikeIndicator.style.opacity = "0";
     } else {
         showResult();
     }
 }
 
 function like() {
+    if (index >= images.length) return;
+
     liked.push(images[index]);
-    index++;
-    resetCard();
-    showImage();
+    animateSwipe("right");
 }
 
 function dislike() {
-    index++;
-    resetCard();
-    showImage();
+    if (index >= images.length) return;
+
+    animateSwipe("left");
+}
+
+function animateSwipe(direction) {
+    // Add animation class
+    card.classList.add(`swipe-${direction}`);
+
+    // Wait for animation to complete
+    setTimeout(() => {
+        card.classList.remove(`swipe-${direction}`);
+        index++;
+        resetCard();
+        showImage();
+    }, 300);
 }
 
 function showResult() {
@@ -40,16 +148,48 @@ function showResult() {
 
     let resultDiv = document.getElementById("result");
     resultDiv.classList.remove("hidden");
+    resultDiv.classList.add("fade-in");
 
-    let html = `<h3>You liked ${liked.length} cats! 😺</h3>`;
-    html += `<div class="result-images">`;
+    let html = "";
 
-    liked.forEach(img => {
-        html += `<img src="${img}" />`;
-    });
+    if (liked.length === 0) {
+        html = `
+            <div class="p-10">
+                <h3 class="text-4xl font-bold text-pink-500 mb-5 handwritten">No cats liked? 😿</h3>
+                <p class="text-xl text-gray-600 mb-8 handwritten">Maybe you're more of a dog person?</p>
+                <button onclick="restart()" 
+                        class="flex flex-col items-center justify-center gap-2 px-10 py-5 border-none rounded-full text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg bg-gradient-to-br from-pink-400 to-purple-400 text-white hover:shadow-xl hover:-translate-y-1 active:scale-95 mx-auto">
+                    <span class="text-3xl">🔄</span>
+                    <span class="text-sm uppercase tracking-wider">Try Again</span>
+                </button>
+            </div>
+        `;
+    } else {
+        html = `
+            <h3 class="text-4xl font-bold text-pink-500 mb-8 handwritten">
+                You liked ${liked.length} ${liked.length === 1 ? 'cat' : 'cats'}! 😺
+            </h3>
+        `;
+        html += `<div class="grid grid-cols-3 gap-4 mb-8">`;
 
-    html += `</div>`;
-    html += `<br><button onclick="restart()">Try Again</button>`;
+        liked.forEach((img, i) => {
+            html += `
+                <div class="bg-white p-2 rounded-lg card-shadow transform hover:scale-105 transition-transform duration-300">
+                    <img src="${img}" alt="Liked cat ${i + 1}" 
+                         class="w-full h-28 object-cover rounded" loading="lazy" />
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        html += `
+            <button onclick="restart()" 
+                    class="flex flex-col items-center justify-center gap-2 px-10 py-5 border-none rounded-full text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg bg-gradient-to-br from-pink-400 to-purple-400 text-white hover:shadow-xl hover:-translate-y-1 active:scale-95 mx-auto">
+                <span class="text-3xl">🔄</span>
+                <span class="text-sm uppercase tracking-wider">Start Over</span>
+            </button>
+        `;
+    }
 
     resultDiv.innerHTML = html;
 }
@@ -57,39 +197,81 @@ function showResult() {
 function restart() {
     index = 0;
     liked = [];
-    document.getElementById("card-container").style.display = "block";
-    document.querySelector(".buttons").style.display = "block";
+    images = [];
+
+    document.getElementById("card-container").style.display = "flex";
+    document.querySelector(".buttons").style.display = "flex";
     document.getElementById("result").classList.add("hidden");
-    showImage();
+
+    init();
 }
 
 /* Swipe Gesture Logic */
 
-let card = document.getElementById("card");
-let startX = 0;
-
-card.addEventListener("touchstart", startSwipe);
-card.addEventListener("touchmove", moveSwipe);
-card.addEventListener("touchend", endSwipe);
-
 function startSwipe(e) {
-    startX = e.touches[0].clientX;
+    e.preventDefault();
+    isDragging = true;
+
+    if (e.type === "mousedown") {
+        startX = e.clientX;
+    } else {
+        startX = e.touches[0].clientX;
+    }
 }
 
 function moveSwipe(e) {
-    let moveX = e.touches[0].clientX;
-    let diff = moveX - startX;
+    if (!isDragging) return;
 
-    card.style.transform = `translateX(${diff}px) rotate(${diff / 10}deg)`;
+    let currentX;
+
+    if (e.type === "mousemove") {
+        currentX = e.clientX;
+    } else {
+        currentX = e.touches[0].clientX;
+    }
+
+    let diffX = currentX - startX;
+
+    // Calculate rotation based on horizontal movement
+    let rotation = diffX / 10;
+
+    // Apply transform (only horizontal movement)
+    card.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
+
+    // Show/hide indicators based on swipe direction
+    if (diffX > 50) {
+        likeIndicator.style.opacity = "1";
+        dislikeIndicator.style.opacity = "0";
+    } else if (diffX < -50) {
+        dislikeIndicator.style.opacity = "1";
+        likeIndicator.style.opacity = "0";
+    } else {
+        likeIndicator.style.opacity = "0";
+        dislikeIndicator.style.opacity = "0";
+    }
 }
 
 function endSwipe(e) {
-    let endX = e.changedTouches[0].clientX;
+    if (!isDragging) return;
+    isDragging = false;
+
+    let endX;
+
+    if (e.type === "mouseup" || e.type === "mouseleave") {
+        if (e.type === "mouseleave" && !isDragging) return;
+        endX = e.clientX;
+    } else {
+        endX = e.changedTouches[0].clientX;
+    }
+
     let diff = endX - startX;
 
-    if (diff > 100) {
+    // Threshold for swipe detection
+    const SWIPE_THRESHOLD = 100;
+
+    if (diff > SWIPE_THRESHOLD) {
         like();
-    } else if (diff < -100) {
+    } else if (diff < -SWIPE_THRESHOLD) {
         dislike();
     } else {
         resetCard();
@@ -97,7 +279,10 @@ function endSwipe(e) {
 }
 
 function resetCard() {
-    card.style.transform = "translateX(0)";
+    card.style.transform = "translateX(0) rotate(0)";
+    likeIndicator.style.opacity = "0";
+    dislikeIndicator.style.opacity = "0";
 }
 
-loadCats();
+// Start the app
+init();

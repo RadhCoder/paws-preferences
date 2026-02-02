@@ -1,35 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Paws & Preferences</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paws & Preferences - Find Your Favorite Kitty</title>
+    <meta name="description" content="Swipe through adorable cats and discover your favorites!">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Covered+By+Your+Grace&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="bg-pattern paw-cursor">
 
-    <h2>Paws & Preferences 🐾</h2>
+    <!-- Main centered container -->
+    <div class="main-container">
+        <div class="w-full max-w-md mx-auto relative z-10">
 
-    <div id="app">
-        <div id="counter"></div>
+            <!-- Floating decorative elements -->
+            <div class="fixed top-10 left-10 text-6xl opacity-20 float-animation pointer-events-none"
+                style="animation-delay: 0s;">🐾</div>
+            <div class="fixed top-20 right-20 text-5xl opacity-20 float-animation pointer-events-none"
+                style="animation-delay: 1s;">😻</div>
+            <div class="fixed bottom-20 left-20 text-6xl opacity-20 float-animation pointer-events-none"
+                style="animation-delay: 2s;">🐱</div>
+            <div class="fixed bottom-10 right-10 text-5xl opacity-20 float-animation pointer-events-none"
+                style="animation-delay: 1.5s;">❤️</div>
 
-        <div id="card-container">
-            <div class="card" id="card">
-                <img id="catImage" src="" />
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-6xl font-bold text-pink-600 mb-2 text-shadow-fun handwritten">
+                    Paws & Preferences
+                </h1>
+                <p class="text-xl text-gray-700 handwritten">Swipe to find your purrfect match! 🐾</p>
+            </header>
+
+            <!-- Main App Container -->
+            <div id="app" class="bg-white rounded-3xl p-8 polaroid-shadow relative">
+
+                <!-- Counter -->
+                <div id="counter" class="text-center text-2xl font-semibold text-pink-500 mb-6 handwritten"></div>
+
+                <!-- Card Container -->
+                <div id="card-container" class="relative h-[450px] flex items-center justify-center mb-8">
+
+                    <!-- Card (Polaroid Style) -->
+                    <div class="card w-full max-w-[350px] h-[420px] relative rounded-2xl overflow-visible touch-none transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing bg-white p-4 card-shadow"
+                        id="card">
+
+                        <!-- Photo area -->
+                        <div class="photo-area w-full h-[320px] bg-gray-200 rounded-lg overflow-hidden mb-3">
+                            <img id="catImage" src="" alt="Cute cat" class="w-full h-full object-cover select-none"
+                                draggable="false">
+                        </div>
+
+                        <!-- Polaroid caption area -->
+                        <div class="text-center">
+                            <p class="text-xl text-gray-600 handwritten" id="caption">What do you think?</p>
+                        </div>
+
+                        <!-- Swipe Indicators -->
+                        <div id="dislike-indicator"
+                            class="swipe-indicator absolute top-8 right-8 px-5 py-3 border-4 border-red-500 text-red-500 rounded-lg font-bold text-3xl opacity-0 transition-opacity duration-200 pointer-events-none z-10 -rotate-12 bg-white/90">
+                            <span>NOPE</span>
+                        </div>
+                        <div id="like-indicator"
+                            class="swipe-indicator absolute top-8 left-8 px-5 py-3 border-4 border-green-500 text-green-500 rounded-lg font-bold text-3xl opacity-0 transition-opacity duration-200 pointer-events-none z-10 rotate-12 bg-white/90">
+                            <span>LIKE</span>
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div id="loading" class="hidden flex-col items-center justify-center gap-5">
+                        <div class="spinner"></div>
+                        <p class="text-pink-500 font-semibold text-lg">Loading adorable cats...</p>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="buttons flex justify-center gap-6 mb-5">
+                    <button onclick="dislike()"
+                        class="dislike flex flex-col items-center justify-center gap-2 px-8 py-4 border-none rounded-full text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg min-w-[110px] bg-gradient-to-br from-red-400 to-pink-400 text-white hover:shadow-xl hover:-translate-y-1 active:scale-95">
+                        <span class="text-3xl">✕</span>
+                        <span class="text-sm uppercase tracking-wider">Nope</span>
+                    </button>
+                    <button onclick="like()"
+                        class="like flex flex-col items-center justify-center gap-2 px-8 py-4 border-none rounded-full text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg min-w-[110px] bg-gradient-to-br from-green-400 to-emerald-400 text-white hover:shadow-xl hover:-translate-y-1 active:scale-95">
+                        <span class="text-3xl">♥</span>
+                        <span class="text-sm uppercase tracking-wider">Like</span>
+                    </button>
+                </div>
+
+                <!-- Results Container -->
+                <div id="result" class="hidden text-center"></div>
             </div>
         </div>
-
-        <div class="buttons">
-            <button class="dislike" onclick="dislike()">👎 Dislike</button>
-            <button class="like" onclick="like()">👍 Like</button>
-        </div>
-
-        <div id="result" class="hidden"></div>
     </div>
 
     <script src="script.js"></script>
-
 </body>
 
 </html>
