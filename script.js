@@ -70,31 +70,37 @@ async function loadCats() {
         images.push(`https://cataas.com/cat?${Date.now()}-${i}`);
     }
 
-    // Preload first image
-    const firstImage = new Image();
-    firstImage.onload = () => {
-        preloadedImages[0] = firstImage;
-        loading.classList.add("hidden");
-        loading.classList.remove("flex");
-        card.style.display = "block";
-        showImage();
-        // Start preloading next images immediately
-        preloadNextImages(1);
-    };
-    firstImage.onerror = () => {
-        // If image fails to load, still show the card
-        loading.classList.add("hidden");
-        loading.classList.remove("flex");
-        card.style.display = "block";
-        showImage();
-        preloadNextImages(1);
-    };
-    firstImage.src = images[0];
+    // Preload first 5 images upfront for smoother experience
+    const preloadPromises = [];
+    for (let i = 0; i < Math.min(5, TOTAL); i++) {
+        const img = new Image();
+        img.src = images[i];
+        preloadedImages[i] = img;
+
+        // Only wait for the first image to be ready
+        if (i === 0) {
+            preloadPromises.push(new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve; // Still resolve on error
+            }));
+        }
+    }
+
+    // Wait for first image, then show UI
+    await Promise.all(preloadPromises);
+
+    loading.classList.add("hidden");
+    loading.classList.remove("flex");
+    card.style.display = "block";
+    showImage();
+
+    // Continue preloading remaining images in background
+    preloadNextImages(5);
 }
 
-// Preload next 3 images in the background
+// Preload next 5 images in the background (increased from 3)
 function preloadNextImages(startIndex) {
-    for (let i = startIndex; i < Math.min(startIndex + 3, images.length); i++) {
+    for (let i = startIndex; i < Math.min(startIndex + 5, images.length); i++) {
         if (!preloadedImages[i]) {
             const img = new Image();
             img.src = images[i];
@@ -169,13 +175,13 @@ function animateSwipe(direction) {
     // Immediately move to next image (don't wait for animation)
     index++;
 
-    // Wait only 200ms for animation (faster than before)
+    // Wait only 150ms for animation (even faster)
     setTimeout(() => {
         card.classList.remove(`swipe-${direction}`);
         card.classList.remove('swiping');
         resetCard();
         showImage();
-    }, 200);
+    }, 150);
 }
 
 function showResult() {
