@@ -1,6 +1,7 @@
 let images = [];
 let index = 0;
 let liked = [];
+let preloadedImages = {}; // Cache for preloaded images
 
 const TOTAL = 15;
 
@@ -72,10 +73,13 @@ async function loadCats() {
     // Preload first image
     const firstImage = new Image();
     firstImage.onload = () => {
+        preloadedImages[0] = firstImage;
         loading.classList.add("hidden");
         loading.classList.remove("flex");
         card.style.display = "block";
         showImage();
+        // Start preloading next images immediately
+        preloadNextImages(1);
     };
     firstImage.onerror = () => {
         // If image fails to load, still show the card
@@ -83,16 +87,41 @@ async function loadCats() {
         loading.classList.remove("flex");
         card.style.display = "block";
         showImage();
+        preloadNextImages(1);
     };
     firstImage.src = images[0];
+}
+
+// Preload next 3 images in the background
+function preloadNextImages(startIndex) {
+    for (let i = startIndex; i < Math.min(startIndex + 3, images.length); i++) {
+        if (!preloadedImages[i]) {
+            const img = new Image();
+            img.src = images[i];
+            preloadedImages[i] = img;
+        }
+    }
 }
 
 function showImage() {
     if (index < images.length) {
         const img = document.getElementById("catImage");
+        const photoArea = img.parentElement;
 
-        // Simple image update without complex transitions
-        img.src = images[index];
+        // Add loading state
+        photoArea.classList.add('loading-image');
+
+        // Use preloaded image if available for instant display
+        if (preloadedImages[index] && preloadedImages[index].complete) {
+            img.src = preloadedImages[index].src;
+            photoArea.classList.remove('loading-image');
+        } else {
+            // Fallback if not preloaded yet
+            img.onload = () => {
+                photoArea.classList.remove('loading-image');
+            };
+            img.src = images[index];
+        }
 
         // Update counter and caption
         document.getElementById("counter").innerText = `Cat ${index + 1} of ${TOTAL}`;
@@ -101,6 +130,9 @@ function showImage() {
         // Reset indicators
         likeIndicator.style.opacity = "0";
         dislikeIndicator.style.opacity = "0";
+
+        // Preload next batch of images
+        preloadNextImages(index + 1);
     } else {
         showResult();
     }
@@ -192,6 +224,7 @@ function restart() {
     index = 0;
     liked = [];
     images = [];
+    preloadedImages = {}; // Clear cache
 
     document.getElementById("card-container").style.display = "flex";
     document.querySelector(".buttons").style.display = "flex";
